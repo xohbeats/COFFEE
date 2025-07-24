@@ -240,3 +240,64 @@ a {
   background: #e2e6f8;
   transform: translateY(-1px);
 }
+
+/* Mood & Habit Tracker */
+.tracker-container {
+  max-width: 700px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background: #fefefe;
+  border-radius: 16px;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.06);
+}
+
+.tracker-container h2 {
+  font-size: 1.4rem;
+  margin-bottom: 0.5rem;
+}
+
+form, .goal-tracker {
+  margin-bottom: 2rem;
+}
+
+select, textarea, input[type="text"] {
+  width: 100%;
+  padding: 0.8rem;
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+  border: 1px solid #cdd;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-family: Inter, sans-serif;
+}
+
+button {
+  padding: 0.7rem 1.5rem;
+  background-color: #2e2f42;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #44475a;
+}
+
+#logList {
+  list-style: none;
+  padding: 0;
+}
+
+#logList li {
+  background: #f4f6f8;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+
