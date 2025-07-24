@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login | COFFEE Invite Only</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="container" style="max-width: 400px; margin: 5rem auto; text-align:center;">
+    <h1>Welcome to COFFEE</h1>
+    <p>Please enter your invite code to access the app.</p>
+    <form id="login-form">
+      <input type="text" id="invite-code" placeholder="Invite Code" required autofocus style="width:100%; padding:0.75rem; font-size:1rem; border-radius:8px; border:1px solid #ccc; margin-bottom:1rem;">
+      <button type="submit" style="width:100%; padding:0.75rem; font-size:1rem; border-radius:8px; background:#2e2f42; color:#fff; border:none; cursor:pointer;">Enter</button>
+    </form>
+    <p id="error-message" style="color:red; margin-top:1rem; display:none;"></p>
+  </main>
+
+  <script>
+    const validInvites = ['COFFEE123', 'INVITE456', 'WELCOME789']; // Example invite codes
+
+    document.getElementById('login-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const code = document.getElementById('invite-code').value.trim();
+      const errorMsg = document.getElementById('error-message');
+
+      if(validInvites.includes(code)) {
+        sessionStorage.setItem('coffee-authenticated', 'true');
+        window.location.href = 'index.html'; // Redirect to main app
+      } else {
+        errorMsg.style.display = 'block';
+        errorMsg.textContent = 'Invalid invite code. Please try again.';
+      }
+    });
+  </script>
+</body>
+</html>
