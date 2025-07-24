@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Pour It Out | COFFEE</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="journal.js" defer></script>
+</head>
+<body>
+  <header class="header">
+    <div class="container">
+      <h1 class="logo">COFFEE</h1>
+      <nav class="nav">
+        <a href="index.html">Home</a>
+        <a href="journal.html" class="active">Journals</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="journal-entry">
+      <h2>🧍‍♂️ Pour It Out</h2>
+      <p>Write something that’s been on your mind. You’re anonymous. You’re safe here.</p>
+      <form id="journal-form">
+        <textarea id="journalText" placeholder="What's weighing on you?" required></textarea>
+        <button type="submit" class="btn-primary">Submit</button>
+      </form>
+    </section>
+
+    <section class="journal-feed" id="journalFeed">
+      <h3>Recent Entries</h3>
+      <!-- Journal entries load here via journal.js -->
+    </section>
+  </main>
+</body>
+</html>
