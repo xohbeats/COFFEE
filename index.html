@@ -694,7 +694,7 @@
                 const fullPrompt = `You are Barista Bot, a friendly, supportive, and empathetic AI companion for a men's mental health app called COFFEE. Your tone should be calm, encouraging, and non-judgmental. Avoid giving direct medical advice, but listen actively and offer supportive reflections. A user has said: "${prompt}"`;
                 chatHistory.push({ role: "user", parts: [{ text: fullPrompt }] });
                 const payload = { contents: chatHistory };
-                const apiKey = ""; // PASTE YOUR GOOGLE AI STUDIO API KEY HERE
+                const apiKey = "AIzaSyBEA1F3i-5xvO_efuV-BK3lkIuzf4q8hnU"; // PASTE YOUR GOOGLE AI STUDIO API KEY HERE
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
                 const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 if (!response.ok) throw new Error(`API request failed with status ${response.status}`);
