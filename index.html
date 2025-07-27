@@ -18,24 +18,26 @@
         /* --- Base Styles --- */
         :root {
             --bg-color: #F8F6F2;
-            --text-color: #4A4A4A;
+            --text-color: #333333; /* Darker text for better contrast */
             --card-bg: #FFFFFF;
             --border-color: #EAEAEA;
             --primary-color: #6F4E37;
             --primary-hover: #5a3f2d;
             --secondary-bg: #EAEAEA;
             --text-muted: #9CA3AF;
+            --accent-color: #E87A00; /* Invigorating coffee-orange */
         }
 
         body[data-theme="dark"] {
             --bg-color: #1a1a1a;
-            --text-color: #e0e0e0;
+            --text-color: #f0f0f0; /* Brighter text for dark mode */
             --card-bg: #2c2c2c;
             --border-color: #404040;
             --primary-color: #a98b71;
             --primary-hover: #c5a78d;
             --secondary-bg: #404040;
             --text-muted: #6B7280;
+            --accent-color: #FFA500;
         }
 
         body {
@@ -45,20 +47,56 @@
             transition: background-color 0.3s, color 0.3s;
         }
 
-        .logo { font-weight: 700; color: var(--primary-color); }
-        .nav-link { transition: color 0.3s; }
-        .nav-link.active { color: var(--primary-color); border-bottom: 2px solid var(--primary-color); }
+        .logo { 
+            font-weight: 700; 
+            color: var(--primary-color);
+            animation: text-glow 2s ease-in-out infinite alternate;
+        }
+        .nav-link { 
+            transition: color 0.3s, border-color 0.3s;
+            padding-bottom: 4px;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover {
+            color: var(--accent-color);
+        }
+        .nav-link.active { 
+            color: var(--accent-color); 
+            border-bottom: 2px solid var(--accent-color); 
+        }
         .btn-primary { background-color: var(--primary-color); color: #FFFFFF; transition: background-color 0.3s; }
         .btn-primary:hover { background-color: var(--primary-hover); }
         .card { background-color: var(--card-bg); border: 1px solid var(--border-color); box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); }
         .chat-bubble-user { background-color: var(--primary-color); color: white; }
         .chat-bubble-bot { background-color: var(--secondary-bg); color: var(--text-color); }
         
+        /* --- Header Background --- */
+        .header-bg {
+            position: relative;
+            background-color: rgba(255, 255, 255, 0.8); /* Fallback */
+        }
+        .header-bg::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('https://placehold.co/1200x100/000000/FFFFFF?text=Friends+Chatting');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.1; /* Dimmed effect */
+            z-index: -1;
+        }
+        body[data-theme="dark"] .header-bg::before {
+            opacity: 0.05;
+        }
+        
         /* --- Interactive Card Styles --- */
         .feature-card { position: relative; background-color: var(--card-bg); border-radius: 0.75rem; overflow: hidden; border: 1px solid var(--border-color); transition: transform 0.3s ease, box-shadow 0.3s ease; cursor: pointer; }
         .feature-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1), 0 6px 6px rgba(0,0,0,0.08); }
-        .feature-card::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 150%; height: 150%; background-image: radial-gradient(circle, var(--primary-color) 0%, rgba(111, 78, 55, 0) 70%); opacity: 0; transition: opacity 0.5s ease; z-index: 1; mix-blend-mode: overlay;}
-        .feature-card:hover::before { opacity: 0.3; }
+        .feature-card::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 150%; height: 150%; background-image: radial-gradient(circle, var(--accent-color) 0%, rgba(111, 78, 55, 0) 70%); opacity: 0; transition: opacity 0.5s ease; z-index: 1; mix-blend-mode: overlay;}
+        .feature-card:hover::before { opacity: 0.4; }
         .feature-card-content { position: relative; z-index: 2; padding: 1.5rem; text-align: center; }
         .feature-card-image { width: 100%; height: 150px; object-fit: cover; border-radius: 0.5rem; margin-bottom: 1rem; }
         
@@ -71,7 +109,7 @@
         .reply-indicator { background-color: var(--secondary-bg); padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; margin-bottom: 0.5rem; }
         .reply-form { margin-top: 1rem; }
 
-        /* --- Box Breathing Animation --- */
+        /* --- Animations --- */
         @keyframes breathe {
             0%, 100% { transform: scale(0.8); }
             25% { transform: scale(1.0); }
@@ -79,13 +117,21 @@
             75% { transform: scale(0.8); }
         }
         .breathing-box { animation: breathe 16s infinite ease-in-out; }
+        
+        @keyframes text-glow {
+            from { text-shadow: 0 0 5px var(--accent-color), 0 0 10px var(--accent-color); }
+            to { text-shadow: 0 0 10px var(--accent-color), 0 0 20px var(--accent-color); }
+        }
+
+        .progress-bar-container { background-color: var(--secondary-bg); border-radius: 9999px; overflow: hidden; }
+        .progress-bar { background-color: var(--primary-color); height: 100%; transition: width 0.5s linear; }
     </style>
 </head>
 <body class="antialiased">
 
     <!-- Main Application Container -->
     <div id="app-container" class="hidden">
-        <header class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
+        <header class="header-bg bg-white/80 dark:bg-gray-800/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
             <div class="container mx-auto px-4">
                 <div class="flex justify-between items-center py-4">
                     <h1 class="logo text-2xl md:text-3xl">COFFEE</h1>
@@ -175,7 +221,7 @@
         const storage = getStorage(app);
         let userId = null;
         let chartInstance = null;
-        let unsubscribeJournal, unsubscribeSupport, unsubscribePresence, unsubscribeTracker;
+        let unsubscribeJournal, unsubscribeSupport, unsubscribePresence, unsubscribeTracker, mindfulMomentsInterval;
 
         enableIndexedDbPersistence(db).catch((err) => {
             if (err.code == 'failed-precondition') console.warn("Persistence failed: Multiple tabs open.");
@@ -217,6 +263,7 @@
             if (unsubscribePresence) unsubscribePresence();
             if (unsubscribeTracker) unsubscribeTracker();
             if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+            if (mindfulMomentsInterval) clearInterval(mindfulMomentsInterval);
             
             window.location.hash = page;
             updateNavLinks(page);
@@ -253,28 +300,28 @@
                     <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
                         <div class="feature-card" onclick="navigate('journal')">
                             <div class="feature-card-content">
-                                <img src="https://placehold.co/400x250/F8F6F2/6F4E37?text=Pour+It+Out" alt="Journaling" class="feature-card-image">
+                                <img src="https://placehold.co/400x250/6F4E37/FFFFFF?text=Pour+It+Out" alt="Journaling" class="feature-card-image">
                                 <h4 class="text-xl font-semibold mb-2">Pour It Out</h4>
                                 <p>Write freely in your private journal. No judgment, no pressure.</p>
                             </div>
                         </div>
                         <div class="feature-card" onclick="navigate('tracker')">
                             <div class="feature-card-content">
-                                <img src="https://placehold.co/400x250/F8F6F2/6F4E37?text=My+Roast" alt="Mood Tracking" class="feature-card-image">
+                                <img src="https://placehold.co/400x250/6F4E37/FFFFFF?text=My+Roast" alt="Mood Tracking" class="feature-card-image">
                                 <h4 class="text-xl font-semibold mb-2">My Roast</h4>
                                 <p>Track your emotional health, patterns, and progress over time.</p>
                             </div>
                         </div>
                         <div class="feature-card" onclick="navigate('support')">
                             <div class="feature-card-content">
-                                <img src="https://placehold.co/400x250/F8F6F2/6F4E37?text=Support" alt="Support Rooms" class="feature-card-image">
+                                <img src="https://placehold.co/400x250/6F4E37/FFFFFF?text=Support" alt="Support Rooms" class="feature-card-image">
                                 <h4 class="text-xl font-semibold mb-2">Support Rooms</h4>
                                 <p>Talk it out with others who understand — no small talk needed.</p>
                             </div>
                         </div>
                         <div class="feature-card" onclick="navigate('bot')">
                              <div class="feature-card-content">
-                                <img src="https://placehold.co/400x250/F8F6F2/6F4E37?text=Barista+Bot" alt="AI Chat Bot" class="feature-card-image">
+                                <img src="https://placehold.co/400x250/6F4E37/FFFFFF?text=Barista+Bot" alt="AI Chat Bot" class="feature-card-image">
                                 <h4 class="text-xl font-semibold mb-2">The Barista Bot</h4>
                                 <p>An AI companion for a daily check-in, helping you stay centered.</p>
                             </div>
@@ -284,7 +331,6 @@
         }
 
         async function renderJournal() {
-            // This function is now complete and correct from the previous version.
             mainContent.innerHTML = `
                 <div class="max-w-4xl mx-auto">
                     <h2 class="text-3xl font-bold mb-2">Pour It Out</h2>
@@ -478,7 +524,6 @@
         }
 
         async function renderTracker() {
-            // This function is now complete and correct from the previous version.
             mainContent.innerHTML = `
                 <div class="max-w-4xl mx-auto">
                     <h2 class="text-3xl font-bold mb-2">My Roast</h2>
@@ -542,7 +587,6 @@
         }
 
         function renderMindfulMoments() {
-            // This function is now complete and correct from the previous version.
             mainContent.innerHTML = `
                 <div class="text-center">
                     <h2 class="text-3xl font-bold mb-2">Mindful Moments</h2>
@@ -552,22 +596,45 @@
                     <h3 class="text-2xl font-semibold mb-4">Box Breathing</h3>
                     <div class="relative w-48 h-48 mx-auto mb-4">
                         <div class="breathing-box absolute inset-0 bg-primary-color rounded-lg opacity-50"></div>
-                        <div id="breathing-text" class="absolute inset-0 flex items-center justify-center text-2xl font-bold text-white">Get Ready...</div>
+                        <div id="breathing-text" class="absolute inset-0 flex items-center justify-center text-3xl font-bold text-black">Get Ready...</div>
                     </div>
-                    <p style="color: var(--text-muted);">Follow the text and the expanding box to regulate your breath.</p>
+                    <div class="w-full progress-bar-container h-2 mt-4">
+                        <div id="progress-bar" class="progress-bar"></div>
+                    </div>
+                    <p style="color: var(--text-muted);" class="mt-4">Follow the prompts to regulate your breath.</p>
                 </div>`;
             
             const textEl = document.getElementById('breathing-text');
-            const cycle = ['Breathe In (4s)', 'Hold (4s)', 'Breathe Out (4s)', 'Hold (4s)'];
-            let i = 0;
-            const intervalId = setInterval(() => {
-                if (!document.getElementById('breathing-text')) {
-                    clearInterval(intervalId);
+            const progressBar = document.getElementById('progress-bar');
+            const cycle = ['Breathe In', 'Hold', 'Breathe Out', 'Hold'];
+            let phaseIndex = 0;
+            let countdown = 4;
+
+            const updateTimer = () => {
+                if (!textEl || !progressBar) {
+                    clearInterval(mindfulMomentsInterval);
                     return;
                 }
-                textEl.textContent = cycle[i];
-                i = (i + 1) % cycle.length;
-            }, 4000);
+                
+                textEl.textContent = `${cycle[phaseIndex]} (${countdown})`;
+                progressBar.style.width = `${(countdown / 4) * 100}%`;
+
+                countdown--;
+
+                if (countdown < 0) {
+                    countdown = 4;
+                    phaseIndex = (phaseIndex + 1) % cycle.length;
+                    // Start the next cycle immediately
+                    textEl.textContent = `${cycle[phaseIndex]} (${countdown})`;
+                    progressBar.style.width = `${(countdown / 4) * 100}%`;
+                    countdown--;
+                }
+            };
+            
+            setTimeout(() => {
+                updateTimer(); // Initial call
+                mindfulMomentsInterval = setInterval(updateTimer, 1000);
+            }, 1000); // Initial delay
         }
         
         function renderBaristaBot() {
