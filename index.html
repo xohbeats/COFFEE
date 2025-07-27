@@ -1,105 +1,647 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>COFFEE App | Calm + Premium Mental Health</title>
-  <link rel="stylesheet" href="styles.css" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>COFFEE App | Calm + Premium Mental Health</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* --- Base Styles --- */
+        :root {
+            --bg-color: #F8F6F2;
+            --text-color: #4A4A4A;
+            --card-bg: #FFFFFF;
+            --border-color: #EAEAEA;
+            --primary-color: #6F4E37;
+            --primary-hover: #5a3f2d;
+            --secondary-bg: #EAEAEA;
+            --text-muted: #9CA3AF;
+        }
+
+        body[data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --text-color: #e0e0e0;
+            --card-bg: #2c2c2c;
+            --border-color: #404040;
+            --primary-color: #a98b71;
+            --primary-hover: #c5a78d;
+            --secondary-bg: #404040;
+            --text-muted: #6B7280;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .logo { font-weight: 700; color: var(--primary-color); }
+        .nav-link { transition: color 0.3s; }
+        .nav-link.active { color: var(--primary-color); border-bottom: 2px solid var(--primary-color); }
+        .btn-primary { background-color: var(--primary-color); color: #FFFFFF; transition: background-color 0.3s; }
+        .btn-primary:hover { background-color: var(--primary-hover); }
+        .card { background-color: var(--card-bg); border: 1px solid var(--border-color); box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); }
+        .chat-bubble-user { background-color: var(--primary-color); color: white; }
+        .chat-bubble-bot { background-color: var(--secondary-bg); color: var(--text-color); }
+        
+        /* --- Interactive Card Styles --- */
+        .feature-card { position: relative; background-color: var(--card-bg); border-radius: 0.75rem; overflow: hidden; border: 1px solid var(--border-color); transition: transform 0.3s ease, box-shadow 0.3s ease; cursor: pointer; }
+        .feature-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1), 0 6px 6px rgba(0,0,0,0.08); }
+        .feature-card::before { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 150%; height: 150%; background-image: radial-gradient(circle, var(--primary-color) 0%, rgba(111, 78, 55, 0) 70%); opacity: 0; transition: opacity 0.5s ease; z-index: 1; mix-blend-mode: overlay;}
+        .feature-card:hover::before { opacity: 0.3; }
+        .feature-card-content { position: relative; z-index: 2; padding: 1.5rem; text-align: center; }
+        .feature-card-image { width: 100%; height: 150px; object-fit: cover; border-radius: 0.5rem; margin-bottom: 1rem; }
+        
+        /* --- Support Room Enhancements --- */
+        .chat-image { max-width: 200px; border-radius: 0.5rem; margin-top: 0.5rem; cursor: pointer; }
+        .reaction-btn { background: none; border: 1px solid var(--border-color); cursor: pointer; padding: 2px 8px; border-radius: 9999px; transition: background-color 0.2s; }
+        .reaction-btn:hover { background-color: rgba(0,0,0,0.1); }
+        .reaction-count { font-size: 0.75rem; color: var(--text-muted); }
+        .reply-thread { border-left: 2px solid var(--primary-color); padding-left: 1rem; margin-left: 1rem; margin-top: 0.5rem; }
+        .reply-indicator { background-color: var(--secondary-bg); padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; margin-bottom: 0.5rem; }
+        .reply-form { margin-top: 1rem; }
+
+        /* --- Box Breathing Animation --- */
+        @keyframes breathe {
+            0%, 100% { transform: scale(0.8); }
+            25% { transform: scale(1.0); }
+            50% { transform: scale(1.0); }
+            75% { transform: scale(0.8); }
+        }
+        .breathing-box { animation: breathe 16s infinite ease-in-out; }
+    </style>
 </head>
-<body>
+<body class="antialiased">
 
- <script>
-    if(sessionStorage.getItem('coffee-authenticated') !== 'true') {
-      window.location.href = 'login.html';
-    }
-  </script>
-  
-  <header class="header">
-    <div class="container">
-      <h1 class="logo">COFFEE</h1>
-      <nav class="nav">
-        <a href="index.html">Home</a>
-        <a href="journal.html">Pour It Out</a>
-        <a href="support-rooms.html">Support Rooms</a>
-        <a href="tracker.html">My Roast</a>
-        <a href="barista-bot.html">Barista Bot</a>
-      </nav>
+    <!-- Main Application Container -->
+    <div id="app-container" class="hidden">
+        <header class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
+            <div class="container mx-auto px-4">
+                <div class="flex justify-between items-center py-4">
+                    <h1 class="logo text-2xl md:text-3xl">COFFEE</h1>
+                    <nav class="hidden md:flex items-center space-x-6 text-lg">
+                        <a href="#home" class="nav-link" onclick="navigate('home')">Home</a>
+                        <a href="#journal" class="nav-link" onclick="navigate('journal')">Pour It Out</a>
+                        <a href="#support" class="nav-link" onclick="navigate('support')">Support Rooms</a>
+                        <a href="#tracker" class="nav-link" onclick="navigate('tracker')">My Roast</a>
+                        <a href="#moments" class="nav-link" onclick="navigate('moments')">Mindful Moments</a>
+                        <a href="#bot" class="nav-link" onclick="navigate('bot')">Barista Bot</a>
+                    </nav>
+                    <div class="flex items-center gap-4">
+                        <button id="settings-btn" class="text-2xl text-gray-600 dark:text-gray-300 hover:text-primary-color">
+                            <i class="ph-gear"></i>
+                        </button>
+                        <button id="mobile-menu-button" class="md:hidden text-2xl">
+                            <i class="ph-list"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!-- Mobile Menu -->
+            <div id="mobile-menu" class="hidden md:hidden px-4 pb-4">
+                <nav class="flex flex-col space-y-4 text-center">
+                    <a href="#home" class="nav-link" onclick="navigate('home')">Home</a>
+                    <a href="#journal" class="nav-link" onclick="navigate('journal')">Pour It Out</a>
+                    <a href="#support" class="nav-link" onclick="navigate('support')">Support Rooms</a>
+                    <a href="#tracker" class="nav-link" onclick="navigate('tracker')">My Roast</a>
+                    <a href="#moments" class="nav-link" onclick="navigate('moments')">Mindful Moments</a>
+                    <a href="#bot" class="nav-link" onclick="navigate('bot')">Barista Bot</a>
+                </nav>
+            </div>
+        </header>
+
+        <main id="main-content" class="container mx-auto p-4 md:p-8">
+            <!-- Content will be injected here -->
+        </main>
     </div>
-  </header>
-  <!-- Rest of your index.html content -->
-
-
-  <section class="hero">
-    <div class="container">
-      <h2>A Calm Space for Men’s Mental Health</h2>
-      <p>Reflect. Grow. Connect. COFFEE is where you go when life brews over.</p>
-      <a href="#join" class="btn-primary">Join the Waitlist</a>
-    </div>
-  </section>
-
-  <section id="features" class="features">
-    <div class="container">
-      <h3>What You’ll Find Inside</h3>
-      <div class="features-grid">
-        <div class="feature">
-          <h4>☕ Anonymous Journals</h4>
-          <p>Write freely. No judgment, no pressure. Just a space to reflect.</p>
+    
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="flex items-center justify-center h-screen">
+        <div class="text-center p-8 max-w-md mx-auto">
+            <h1 class="logo text-6xl mb-4">COFFEE</h1>
+            <div id="loading-status" class="text-xl text-gray-600">Brewing a fresh pot...</div>
         </div>
-        <div class="feature">
-          <h4>🧠 Mood Tracking</h4>
-          <p>Track your emotional health, patterns, and progress over time.</p>
+    </div>
+    
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+        <div class="card p-6 rounded-lg w-96">
+            <h3 class="text-xl font-bold mb-4">Settings</h3>
+            <div class="space-y-2">
+                <p class="font-semibold">Theme</p>
+                <div class="flex gap-4">
+                    <button onclick="setTheme('light')" class="flex-1 p-2 border rounded-md">Latte (Light)</button>
+                    <button onclick="setTheme('dark')" class="flex-1 p-2 border rounded-md">Dark Roast</button>
+                </div>
+            </div>
+            <button onclick="document.getElementById('settings-modal').classList.add('hidden')" class="btn-primary mt-6 w-full py-2 rounded-md">Close</button>
         </div>
-        <div class="feature">
-          <h4>🤝 Support Rooms</h4>
-          <p>Talk it out with others who understand — no small talk needed.</p>
-        </div>
-        <div class="feature">
-          <h4>🎙️ The Barista Bot</h4>
-          <p>A daily check-in guide to help you stay centered and consistent.</p>
-        </div>
-      </div>
     </div>
-  </section>
 
-  <section id="about" class="about">
-    <div class="container">
-      <h3>Why We Built COFFEE</h3>
-      <p>Too many men are silently carrying too much. We’re changing that. COFFEE is your safe space — for those 2AM thoughts, for silent wins, for untold pain, for healing on your own terms.</p>
-    </div>
-  </section>
 
-  <section id="join" class="waitlist">
-    <div class="container">
-      <h3>Get Early Access</h3>
-      <p>Join the waitlist and be first to know when we launch. Your journey starts here.</p>
-      <form id="waitlist-form" action="#" method="POST">
-        <input type="email" placeholder="Enter your email" name="email" required />
-        <button type="submit" class="btn-primary">Join Now</button>
-      </form>
-    </div>
-  </section>
+    <!-- Firebase and App Logic -->
+    <script type="module">
+        // Firebase Imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, onSnapshot, doc, setDoc, getDoc, updateDoc, deleteDoc, serverTimestamp, enableIndexedDbPersistence, increment, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
 
-  <section class="testimonials">
-    <div class="container">
-      <h3>What Our Early Testers Are Saying</h3>
-      <div class="testimonial">
-        <p>"This is the first place I’ve felt heard without having to explain everything. It’s powerful." – Marcus, 34</p>
-      </div>
-      <div class="testimonial">
-        <p>"I use COFFEE every morning. It’s my check-in before I take on the world." – Eli, 28</p>
-      </div>
-    </div>
-  </section>
+        // --- FIREBASE CONFIGURATION ---
+        const firebaseConfig = {
+          apiKey: "AIzaSyC6L6sB5_H85MA7Lp55Vp4JVE_vaY_ruLY",
+          authDomain: "invite-codes-7e7ad.firebaseapp.com",
+          projectId: "invite-codes-7e7ad",
+          storageBucket: "invite-codes-7e7ad.appspot.com",
+          messagingSenderId: "419426957092",
+          appId: "1:419426957092:web:16f8152ae900a7c14165b1",
+          measurementId: "G-0E472LE782"
+        };
 
-  <footer class="footer">
-    <div class="container">
-      <p>&copy; 2025 COFFEE. All rights reserved.</p>
-      <nav class="footer-nav">
-        <a href="#">Privacy</a>
-        <a href="#">Terms</a>
-        <a href="#">Contact</a>
-      </nav>
-    </div>
-  </footer>
+        // --- APP INITIALIZATION ---
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+        let userId = null;
+        let chartInstance = null;
+        let unsubscribeJournal, unsubscribeSupport, unsubscribePresence, unsubscribeTracker;
+
+        enableIndexedDbPersistence(db).catch((err) => {
+            if (err.code == 'failed-precondition') console.warn("Persistence failed: Multiple tabs open.");
+            else if (err.code == 'unimplemented') console.warn("Persistence failed: Browser not supported.");
+        });
+
+        const loadingScreen = document.getElementById('loading-screen');
+        const appContainer = document.getElementById('app-container');
+        const mainContent = document.getElementById('main-content');
+        
+        const settingsBtn = document.getElementById('settings-btn');
+        const settingsModal = document.getElementById('settings-modal');
+        settingsBtn.addEventListener('click', () => settingsModal.classList.remove('hidden'));
+        window.setTheme = (theme) => {
+            document.body.dataset.theme = theme;
+            localStorage.setItem('coffee-theme', theme);
+        };
+        setTheme(localStorage.getItem('coffee-theme') || 'light');
+
+        onAuthStateChanged(auth, user => {
+            if (user) {
+                userId = user.uid;
+                loadingScreen.classList.add('hidden');
+                appContainer.classList.remove('hidden');
+                navigate(window.location.hash.substring(1) || 'home');
+            } else {
+                loadingScreen.classList.remove('hidden');
+                appContainer.classList.add('hidden');
+            }
+        });
+        
+        (async () => {
+            try { await signInAnonymously(auth); } catch (error) { console.error("Sign-in failed:", error); }
+        })();
+
+        window.navigate = (page) => {
+            if (unsubscribeJournal) unsubscribeJournal();
+            if (unsubscribeSupport) unsubscribeSupport();
+            if (unsubscribePresence) unsubscribePresence();
+            if (unsubscribeTracker) unsubscribeTracker();
+            if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+            
+            window.location.hash = page;
+            updateNavLinks(page);
+
+            switch (page) {
+                case 'journal': renderJournal(); break;
+                case 'support': renderSupportRoom(); break;
+                case 'tracker': renderTracker(); break;
+                case 'moments': renderMindfulMoments(); break;
+                case 'bot': renderBaristaBot(); break;
+                default: renderHomePage(); break;
+            }
+        };
+
+        function updateNavLinks(activePage) {
+            document.querySelectorAll('.nav-link').forEach(link => {
+                const linkPage = new URL(link.href).hash.substring(1);
+                if (linkPage === activePage) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+        }
+        
+        function renderHomePage() {
+            mainContent.innerHTML = `
+                <section class="text-center">
+                    <h2 class="text-4xl font-bold mb-4">A Calm Space for Men’s Mental Health</h2>
+                    <p class="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">Reflect. Grow. Connect. COFFEE is where you go when life brews over.</p>
+                </section>
+                <section id="features" class="mt-16">
+                    <h3 class="text-3xl font-bold text-center mb-10">What You’ll Find Inside</h3>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                        <div class="feature-card" onclick="navigate('journal')">
+                            <div class="feature-card-content">
+                                <img src="https://placehold.co/400x250/F8F6F2/6F4E37?text=Pour+It+Out" alt="Journaling" class="feature-card-image">
+                                <h4 class="text-xl font-semibold mb-2">Pour It Out</h4>
+                                <p>Write freely in your private journal. No judgment, no pressure.</p>
+                            </div>
+                        </div>
+                        <div class="feature-card" onclick="navigate('tracker')">
+                            <div class="feature-card-content">
+                                <img src="https://placehold.co/400x250/F8F6F2/6F4E37?text=My+Roast" alt="Mood Tracking" class="feature-card-image">
+                                <h4 class="text-xl font-semibold mb-2">My Roast</h4>
+                                <p>Track your emotional health, patterns, and progress over time.</p>
+                            </div>
+                        </div>
+                        <div class="feature-card" onclick="navigate('support')">
+                            <div class="feature-card-content">
+                                <img src="https://placehold.co/400x250/F8F6F2/6F4E37?text=Support" alt="Support Rooms" class="feature-card-image">
+                                <h4 class="text-xl font-semibold mb-2">Support Rooms</h4>
+                                <p>Talk it out with others who understand — no small talk needed.</p>
+                            </div>
+                        </div>
+                        <div class="feature-card" onclick="navigate('bot')">
+                             <div class="feature-card-content">
+                                <img src="https://placehold.co/400x250/F8F6F2/6F4E37?text=Barista+Bot" alt="AI Chat Bot" class="feature-card-image">
+                                <h4 class="text-xl font-semibold mb-2">The Barista Bot</h4>
+                                <p>An AI companion for a daily check-in, helping you stay centered.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>`;
+        }
+
+        async function renderJournal() {
+            // This function is now complete and correct from the previous version.
+            mainContent.innerHTML = `
+                <div class="max-w-4xl mx-auto">
+                    <h2 class="text-3xl font-bold mb-2">Pour It Out</h2>
+                    <p class="text-gray-600 dark:text-gray-400 mb-6">Your private space to reflect. Tag your entries to find them later.</p>
+                    <div class="card p-6 rounded-lg mb-8">
+                        <form id="journal-form">
+                            <textarea id="journal-entry" class="w-full p-3 border rounded-md h-40 bg-transparent" placeholder="What's on your mind today?"></textarea>
+                            <div class="flex justify-between items-center mt-4">
+                                <select id="journal-mood" class="p-2 border rounded-md bg-transparent">
+                                    <option value="">No Mood</option><option>Hopeful</option><option>Grateful</option><option>Proud</option><option>Anxious</option><option>Stressed</option><option>Sad</option>
+                                </select>
+                                <button type="submit" class="btn-primary font-bold py-2 px-6 rounded-md">Save Entry</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="mb-4 flex flex-wrap gap-2 items-center">
+                        <input id="journal-search" class="flex-1 p-2 border rounded-md bg-transparent" placeholder="Search entries..."/>
+                        <button class="mood-filter-btn p-2 border rounded-md" data-mood="all">All</button>
+                        <button class="mood-filter-btn p-2 border rounded-md" data-mood="Hopeful">Hopeful</button>
+                        <button class="mood-filter-btn p-2 border rounded-md" data-mood="Anxious">Anxious</button>
+                    </div>
+                    <div id="journal-entries" class="space-y-4"></div>
+                </div>`;
+
+            const form = document.getElementById('journal-form');
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const content = form['journal-entry'].value.trim();
+                const mood = form['journal-mood'].value;
+                if (content) {
+                    await addDoc(collection(db, `users/${userId}/journal`), { content, mood, createdAt: serverTimestamp() });
+                    form.reset();
+                }
+            });
+
+            const renderEntries = (entries) => {
+                document.getElementById('journal-entries').innerHTML = entries.length > 0 ? entries.map(entry => `
+                    <div class="card p-5 rounded-lg">
+                        ${entry.mood ? `<span class="text-xs font-semibold uppercase" style="color: var(--primary-color);">${entry.mood}</span>` : ''}
+                        <p class="mt-2">${entry.content.replace(/\n/g, '<br>')}</p>
+                        <p class="text-xs mt-3" style="color: var(--text-muted);">${entry.createdAt?.toDate().toLocaleString() || 'Just now'}</p>
+                    </div>`).join('') : '<p>No entries found.</p>';
+            };
+
+            let allEntries = [];
+            const q = query(collection(db, `users/${userId}/journal`));
+            unsubscribeJournal = onSnapshot(q, (snapshot) => {
+                allEntries = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                allEntries.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+                renderEntries(allEntries);
+            });
+
+            mainContent.addEventListener('input', (e) => {
+                if (e.target.id !== 'journal-search') return;
+                const searchTerm = e.target.value.toLowerCase();
+                const filtered = allEntries.filter(entry => entry.content.toLowerCase().includes(searchTerm));
+                renderEntries(filtered);
+            });
+            mainContent.addEventListener('click', (e) => {
+                if (!e.target.classList.contains('mood-filter-btn')) return;
+                const mood = e.target.dataset.mood;
+                renderEntries(mood === 'all' ? allEntries : allEntries.filter(entry => entry.mood === mood));
+            });
+        }
+        
+        function renderSupportRoom() {
+            mainContent.innerHTML = `
+                <div class="flex flex-col h-[80vh] max-w-4xl mx-auto">
+                    <div class="text-center mb-4">
+                        <h2 class="text-3xl font-bold">Support Room</h2>
+                        <div id="live-user-count" class="flex items-center justify-center gap-2 text-green-600 font-semibold"></div>
+                    </div>
+                    <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4" role="alert">
+                        <p class="font-bold">Community Guideline</p>
+                        <p>This is a safe space. Posting explicit, harmful, or abusive content is strictly forbidden. Violators will be immediately banned.</p>
+                    </div>
+                    <div id="chat-messages" class="flex-1 card rounded-lg p-4 overflow-y-auto mb-4 space-y-4"></div>
+                    <div id="reply-form-container"></div>
+                    <form id="chat-form" class="flex gap-2">
+                        <input id="image-input" type="file" accept="image/png, image/jpeg, image/jpg" class="hidden"/>
+                        <button type="button" id="image-upload-btn" class="p-3 border rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition"><i class="ph-paperclip text-xl"></i></button>
+                        <input id="chat-input" type="text" class="flex-1 p-3 border rounded-md bg-transparent" placeholder="Type your message..." autocomplete="off">
+                        <button type="submit" class="btn-primary font-bold py-2 px-6 rounded-md flex items-center gap-2">Send <i class="ph-paper-plane-tilt"></i></button>
+                    </form>
+                </div>`;
+            
+            const presenceRef = doc(db, 'presence', userId);
+            setDoc(presenceRef, { lastSeen: serverTimestamp() });
+            window.addEventListener('beforeunload', () => deleteDoc(presenceRef));
+
+            unsubscribePresence = onSnapshot(query(collection(db, 'presence')), (snap) => {
+                document.getElementById('live-user-count').innerHTML = `<span class="relative flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span></span><span>${snap.size} Live User(s)</span>`;
+            });
+
+            const renderMessages = (messages) => {
+                const chatContainer = document.getElementById('chat-messages');
+                const messagesMap = new Map(messages.map(m => [m.id, { ...m, replies: [] }]));
+                const rootMessages = [];
+
+                for (const msg of messages) {
+                    if (msg.replyTo) {
+                        messagesMap.get(msg.replyTo)?.replies.push(messagesMap.get(msg.id));
+                    } else {
+                        rootMessages.push(messagesMap.get(msg.id));
+                    }
+                }
+
+                chatContainer.innerHTML = rootMessages.map(msg => renderMessage(msg)).join('');
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            };
+            
+            const renderMessage = (msg) => {
+                const isCurrentUser = msg.uid === userId;
+                const author = isCurrentUser ? 'You' : `User...${msg.uid.slice(-6)}`;
+                const reactions = msg.reactions || {};
+                
+                return `
+                    <div class="message-container" id="msg-${msg.id}">
+                        <div class="flex items-start gap-3">
+                            <div class="flex-1">
+                                <p class="font-semibold text-sm">${author}</p>
+                                <div class="chat-bubble-bot p-3 rounded-lg mt-1 inline-block">
+                                    ${msg.text ? `<p>${msg.text}</p>` : ''}
+                                    ${msg.imageUrl ? `<img src="${msg.imageUrl}" class="chat-image" onclick="window.open('${msg.imageUrl}')"/>` : ''}
+                                </div>
+                                <div class="flex items-center gap-4 mt-1">
+                                    <div class="flex gap-2">
+                                        ${['👍', '❤️', '🤗'].map(emoji => `
+                                            <button class="reaction-btn" data-msg-id="${msg.id}" data-emoji="${emoji}">
+                                                ${emoji} <span class="reaction-count">${reactions[emoji] || 0}</span>
+                                            </button>
+                                        `).join('')}
+                                    </div>
+                                    <button class="text-xs font-semibold" style="color: var(--primary-color);" data-reply-id="${msg.id}">Reply</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="reply-thread">
+                            ${(msg.replies || []).map(reply => renderMessage(reply)).join('')}
+                        </div>
+                    </div>`;
+            };
+
+            unsubscribeSupport = onSnapshot(query(collection(db, 'support-room')), (snapshot) => {
+                const messages = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                messages.sort((a, b) => (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0));
+                renderMessages(messages);
+            });
+
+            let currentReplyTo = null;
+            mainContent.addEventListener('click', async (e) => {
+                const reactionBtn = e.target.closest('.reaction-btn');
+                const replyBtn = e.target.closest('[data-reply-id]');
+
+                if (reactionBtn) {
+                    const { msgId, emoji } = reactionBtn.dataset;
+                    await updateDoc(doc(db, 'support-room', msgId), {
+                        [`reactions.${emoji}`]: increment(1)
+                    });
+                }
+                if (replyBtn) {
+                    currentReplyTo = replyBtn.dataset.replyId;
+                    const replyFormContainer = document.getElementById('reply-form-container');
+                    replyFormContainer.innerHTML = `<div class="reply-indicator">Replying to a message... <button onclick="this.parentElement.innerHTML=''">Cancel</button></div>`;
+                }
+            });
+            
+            document.getElementById('image-upload-btn').addEventListener('click', () => document.getElementById('image-input').click());
+            document.getElementById('image-input').addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const storageRef = ref(storage, `support-images/${Date.now()}-${file.name}`);
+                await uploadBytes(storageRef, file);
+                const imageUrl = await getDownloadURL(storageRef);
+                await addDoc(collection(db, 'support-room'), { uid: userId, createdAt: serverTimestamp(), imageUrl, replyTo: currentReplyTo });
+                currentReplyTo = null;
+                document.getElementById('reply-form-container').innerHTML = '';
+            });
+
+            document.getElementById('chat-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const input = document.getElementById('chat-input');
+                const text = input.value.trim();
+                if (text) {
+                    await addDoc(collection(db, 'support-room'), { uid: userId, createdAt: serverTimestamp(), text, replyTo: currentReplyTo });
+                    input.value = '';
+                    currentReplyTo = null;
+                    document.getElementById('reply-form-container').innerHTML = '';
+                }
+            });
+        }
+
+        async function renderTracker() {
+            // This function is now complete and correct from the previous version.
+            mainContent.innerHTML = `
+                <div class="max-w-4xl mx-auto">
+                    <h2 class="text-3xl font-bold mb-2">My Roast</h2>
+                    <p class="text-gray-600 dark:text-gray-400 mb-6">Track your daily mood to see your trends.</p>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div class="card p-6 rounded-lg">
+                            <h3 class="text-xl font-semibold mb-4">Log Today's Mood</h3>
+                            <div id="mood-selector" class="flex justify-around flex-wrap gap-4 mb-4">
+                                <button data-mood="Great" class="mood-btn text-5xl transform hover:scale-125 transition-transform">😄</button>
+                                <button data-mood="Good" class="mood-btn text-5xl transform hover:scale-125 transition-transform">😊</button>
+                                <button data-mood="Okay" class="mood-btn text-5xl transform hover:scale-125 transition-transform">😐</button>
+                                <button data-mood="Bad" class="mood-btn text-5xl transform hover:scale-125 transition-transform">😕</button>
+                                <button data-mood="Awful" class="mood-btn text-5xl transform hover:scale-125 transition-transform">😢</button>
+                            </div>
+                            <p id="today-log-status" class="text-center text-green-600 font-semibold"></p>
+                        </div>
+                        <div class="card p-6 rounded-lg">
+                            <h3 class="text-xl font-semibold mb-4">Your Mood Mix</h3>
+                            <canvas id="mood-chart"></canvas>
+                        </div>
+                    </div>
+                </div>`;
+
+            mainContent.addEventListener('click', async (e) => {
+                if (!e.target.closest('.mood-btn')) return;
+                const mood = e.target.closest('.mood-btn').dataset.mood;
+                const today = new Date();
+                const docId = today.toISOString().split('T')[0];
+                await setDoc(doc(db, `users/${userId}/moods`, docId), { mood, date: today });
+                const status = document.getElementById('today-log-status');
+                status.textContent = `Logged as "${mood}".`;
+                setTimeout(() => status.textContent = '', 3000);
+            });
+            
+            const q = query(collection(db, `users/${userId}/moods`));
+            unsubscribeTracker = onSnapshot(q, (snapshot) => {
+                const moods = snapshot.docs.map(doc => doc.data().mood);
+                const moodCounts = moods.reduce((acc, mood) => {
+                    acc[mood] = (acc[mood] || 0) + 1;
+                    return acc;
+                }, {});
+
+                const ctx = document.getElementById('mood-chart')?.getContext('2d');
+                if (!ctx) return;
+
+                if (chartInstance) chartInstance.destroy();
+                chartInstance = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: Object.keys(moodCounts),
+                        datasets: [{
+                            data: Object.values(moodCounts),
+                            backgroundColor: ['#4ade80', '#60a5fa', '#a78bfa', '#facc15', '#f87171'],
+                            borderColor: 'var(--card-bg)',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: { responsive: true, plugins: { legend: { position: 'top', labels: { color: 'var(--text-color)' } } } }
+                });
+            });
+        }
+
+        function renderMindfulMoments() {
+            // This function is now complete and correct from the previous version.
+            mainContent.innerHTML = `
+                <div class="text-center">
+                    <h2 class="text-3xl font-bold mb-2">Mindful Moments</h2>
+                    <p class="text-gray-600 dark:text-gray-400 mb-8">Quick exercises to find your center.</p>
+                </div>
+                <div class="max-w-md mx-auto card p-8 rounded-lg text-center">
+                    <h3 class="text-2xl font-semibold mb-4">Box Breathing</h3>
+                    <div class="relative w-48 h-48 mx-auto mb-4">
+                        <div class="breathing-box absolute inset-0 bg-primary-color rounded-lg opacity-50"></div>
+                        <div id="breathing-text" class="absolute inset-0 flex items-center justify-center text-2xl font-bold text-white">Get Ready...</div>
+                    </div>
+                    <p style="color: var(--text-muted);">Follow the text and the expanding box to regulate your breath.</p>
+                </div>`;
+            
+            const textEl = document.getElementById('breathing-text');
+            const cycle = ['Breathe In (4s)', 'Hold (4s)', 'Breathe Out (4s)', 'Hold (4s)'];
+            let i = 0;
+            const intervalId = setInterval(() => {
+                if (!document.getElementById('breathing-text')) {
+                    clearInterval(intervalId);
+                    return;
+                }
+                textEl.textContent = cycle[i];
+                i = (i + 1) % cycle.length;
+            }, 4000);
+        }
+        
+        function renderBaristaBot() {
+            mainContent.innerHTML = `
+                <div class="flex flex-col h-[75vh] max-w-4xl mx-auto">
+                    <div class="text-center mb-4">
+                        <h2 class="text-3xl font-bold">Barista Bot</h2>
+                        <p class="text-gray-600 dark:text-gray-400">Your friendly AI companion. Here to listen, 24/7.</p>
+                    </div>
+                    <div id="bot-chat-messages" class="flex-1 card rounded-lg p-4 overflow-y-auto mb-4 space-y-4">
+                        <div class="max-w-xs md:max-w-md mr-auto">
+                            <div class="text-xs" style="color: var(--text-muted);">Barista Bot</div>
+                            <div class="chat-bubble-bot p-3 rounded-lg mt-1"><p>Hey there. I'm the Barista Bot. Feel free to share what's on your mind.</p></div>
+                        </div>
+                    </div>
+                    <form id="bot-chat-form" class="flex gap-4">
+                        <input id="bot-chat-input" type="text" class="flex-1 p-3 border rounded-md bg-transparent" placeholder="Type your message..." autocomplete="off">
+                        <button type="submit" class="btn-primary font-bold py-2 px-6 rounded-md flex items-center gap-2">Send <i class="ph-paper-plane-tilt"></i></button>
+                    </form>
+                </div>`;
+
+            const chatForm = document.getElementById('bot-chat-form');
+            const chatInput = document.getElementById('bot-chat-input');
+            const messagesContainer = document.getElementById('bot-chat-messages');
+            let chatHistory = [];
+
+            chatForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const userInput = chatInput.value.trim();
+                if (!userInput) return;
+                appendMessage(userInput, 'user');
+                chatInput.value = '';
+                const thinkingIndicator = appendMessage('...', 'bot');
+
+                try {
+                    const botResponse = await getBotResponse(userInput);
+                    thinkingIndicator.querySelector('p').textContent = botResponse;
+                } catch (error) {
+                    console.error('Error fetching bot response:', error);
+                    thinkingIndicator.querySelector('p').textContent = "Sorry, I'm having trouble connecting right now.";
+                }
+            });
+
+            function appendMessage(text, sender) {
+                const isUser = sender === 'user';
+                const messageElement = document.createElement('div');
+                messageElement.className = `max-w-xs md:max-w-md ${isUser ? 'ml-auto' : 'mr-auto'}`;
+                messageElement.innerHTML = `
+                    <div class="text-xs text-right" style="color: var(--text-muted);">${isUser ? 'You' : 'Barista Bot'}</div>
+                    <div class="${isUser ? 'chat-bubble-user' : 'chat-bubble-bot'} p-3 rounded-lg mt-1"><p>${text}</p></div>`;
+                messagesContainer.appendChild(messageElement);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                return messageElement;
+            }
+
+            async function getBotResponse(prompt) {
+                const fullPrompt = `You are Barista Bot, a friendly, supportive, and empathetic AI companion for a men's mental health app called COFFEE. Your tone should be calm, encouraging, and non-judgmental. Avoid giving direct medical advice, but listen actively and offer supportive reflections. A user has said: "${prompt}"`;
+                chatHistory.push({ role: "user", parts: [{ text: fullPrompt }] });
+                const payload = { contents: chatHistory };
+                const apiKey = ""; // PASTE YOUR GOOGLE AI STUDIO API KEY HERE
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                if (!response.ok) throw new Error(`API request failed with status ${response.status}`);
+                const result = await response.json();
+                if (result.candidates?.[0]?.content?.parts?.[0]?.text) {
+                    const botText = result.candidates[0].content.parts[0].text;
+                    chatHistory.push({ role: "model", parts: [{ text: botText }] });
+                    return botText;
+                }
+                return "I'm not sure how to respond to that. Could you try rephrasing?";
+            }
+        }
+
+        window.addEventListener('hashchange', () => navigate(window.location.hash.substring(1) || 'home'));
+    </script>
 </body>
 </html>
